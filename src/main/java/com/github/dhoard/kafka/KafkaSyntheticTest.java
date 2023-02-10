@@ -26,13 +26,6 @@ public class KafkaSyntheticTest {
         new KafkaSyntheticTest().run(args);
     }
 
-    private Timer timer;
-    private KafkaProducerTimerTask kafkaProducerTimerTask;
-    private KafkaProducer<String, String> kafkaProducer;
-    private KafkaConsumer<String, String> kafkaConsumer;
-
-    private HTTPServer httpServer;
-
     public void run(String[] args) throws Exception {
         if ((args == null) || (args.length != 2)) {
             System.out.println("Usage: java -jar <jar> <producer properties> <consume properties");
@@ -54,12 +47,12 @@ public class KafkaSyntheticTest {
 
         consumerProperties.remove("topic");
 
-        kafkaProducer = new KafkaProducer<>(producerProperties);
-        kafkaConsumer = new KafkaConsumer<>(consumerProperties);
+        KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(producerProperties);
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(consumerProperties);
 
-        kafkaProducerTimerTask = new KafkaProducerTimerTask(topic, kafkaProducer);
+        KafkaProducerTimerTask kafkaProducerTimerTask = new KafkaProducerTimerTask(topic, kafkaProducer);
 
-        timer = new Timer();
+        Timer timer = new Timer();
         timer.schedule(kafkaProducerTimerTask, 0, 1000);
 
         kafkaConsumer.subscribe(Collections.singleton(topic));
@@ -70,7 +63,7 @@ public class KafkaSyntheticTest {
                 .labelNames("partition")
                 .register();
 
-        httpServer = new HTTPServer.Builder()
+        new HTTPServer.Builder()
                 .withDaemonThreads(true)
                 .withHostname("0.0.0.0")
                 .withPort(9191)
@@ -83,8 +76,8 @@ public class KafkaSyntheticTest {
                 long now = System.currentTimeMillis();
 
                 for (ConsumerRecord<String, String> consumerRecord : consumerRecords) {
-                    long produceTime = Long.valueOf(consumerRecord.value());
-                    System.out.println(String.format("partition [%d] rtt [%d] ms", consumerRecord.partition(), now - produceTime));
+                    long produceTime = Long.parseLong(consumerRecord.value());
+                    System.out.printf("partition [%d] rtt [%d] ms%n", consumerRecord.partition(), now - produceTime);
                     gauge.labels(String.valueOf(consumerRecord.partition())).set(now - produceTime);
                 }
             } catch (Throwable t) {
@@ -95,9 +88,9 @@ public class KafkaSyntheticTest {
 
     public static class KafkaProducerTimerTask extends TimerTask {
 
-        private String topic;
-        private KafkaProducer<String, String> kafkaProducer;
-        private Callback callback;
+        private final String topic;
+        private final KafkaProducer<String, String> kafkaProducer;
+        private final Callback callback;
 
         public KafkaProducerTimerTask(String topic, KafkaProducer<String, String> kafkaProducer) {
             this.topic = topic;
