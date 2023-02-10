@@ -21,5 +21,12 @@ Execute `./KafkaSyntheticTest.sh producer.properties consumer.properties`
 
 Access Prometheus metrics using `http://localhost:8181`
 
+**Notes**
+
+- A test message is sent to every partition on a 10-second timer
+
+
+- Because the message only contains the produce time, latency will be much greater than a real Kafka use case
+
 # FOR DEMO PURPOSES ONLY
 
