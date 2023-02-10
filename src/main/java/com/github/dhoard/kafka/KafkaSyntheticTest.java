@@ -78,7 +78,7 @@ public class KafkaSyntheticTest {
 
         final Gauge gauge = new Gauge.Builder()
                 .name("kafka_synthetic_test_rtt")
-                .help("Kafka synthetic test RTT")
+                .help("Kafka synthetic test round trip time")
                 .labelNames("partition")
                 .register();
 
