@@ -28,5 +28,5 @@ Access Prometheus metrics using `http://localhost:8181`
 
 - Because the message only contains the produce time, latency will be much greater than a real Kafka use case
 
-# FOR DEMO PURPOSES ONLY
+# FOR DEMO PURPOSES ONLY - NOT SUPPORTED
 
