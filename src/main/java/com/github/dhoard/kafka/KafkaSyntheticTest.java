@@ -1,8 +1,6 @@
 package com.github.dhoard.kafka;
 
-import io.prometheus.client.Collector;
 import io.prometheus.client.Gauge;
-import io.prometheus.client.GaugeMetricFamily;
 import io.prometheus.client.exporter.HTTPServer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -12,27 +10,17 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.PartitionInfo;
-import org.apache.kafka.common.config.ConfigDef;
 
 import java.io.FileReader;
 import java.io.Reader;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.TreeMap;
 
 public class KafkaSyntheticTest {
-
-    private static final Random RANDOM = new Random();
-
-    private String topic;
 
     public static void main(String[] args) throws Exception {
         new KafkaSyntheticTest().run(args);
@@ -61,7 +49,7 @@ public class KafkaSyntheticTest {
             consumerProperties.load(reader);
         }
 
-        topic = producerProperties.getProperty("topic");
+        String topic = producerProperties.getProperty("topic");
         producerProperties.remove("topic");
 
         consumerProperties.remove("topic");
