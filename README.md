@@ -11,7 +11,7 @@ mvn clean package
 
 ## Run
 
-Create a topic with a partition count that is equals to the number of Kafka brokers.
+Create a topic with a partition count that is equal to the number of Kafka brokers.
 
 Edit `producer.properties` to match your Kafka environment.
 
