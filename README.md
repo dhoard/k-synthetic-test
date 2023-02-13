@@ -13,20 +13,18 @@ mvn clean package
 
 Create a topic with a partition count that is equal to the number of Kafka brokers.
 
-Edit `producer.properties` to match your Kafka environment.
+Copy `test.properties` and edit to match your environment
 
-Edit `consumer.properties` to match your Kafka environment.
+Execute `./kafka-synthetic-test.sh <test properties>`
 
-Execute `./KafkaSyntheticTest.sh producer.properties consumer.properties`
-
-Access Prometheus metrics using `http://localhost:8181`
+Access Prometheus metrics using `http://<http.server.address>:<http.server.port>`
 
 **Notes**
 
-- A test message is sent to every partition on a 10-second timer
+- A test message is sent to every partition based on the configured `period.ms` value
 
 
-- Because the message only contains the produce time, latency will be much greater than a real Kafka use case
+- Because the message only contains the produce time, latency will be greater than a real Kafka use case
 
 # FOR DEMO PURPOSES ONLY - NOT SUPPORTED
 
