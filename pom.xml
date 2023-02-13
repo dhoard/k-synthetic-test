@@ -6,7 +6,7 @@
 
   <groupId>com.github.dhoard</groupId>
   <artifactId>kafka-synthetic-test</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -68,6 +68,12 @@
                 </filter>
                 <filter>
                   <artifact>com.github.luben:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/MANIFEST.MF</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>io.prometheus:*</artifact>
                   <excludes>
                     <exclude>META-INF/MANIFEST.MF</exclude>
                   </excludes>
