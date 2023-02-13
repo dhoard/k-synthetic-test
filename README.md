@@ -19,6 +19,16 @@ Execute `./kafka-synthetic-test.sh <test properties>`
 
 Access Prometheus metrics using `http://<http.server.address>:<http.server.port>`
 
+Example output:
+
+```
+# HELP kafka_synthetic_test_round_trip_time Kafka synthetic test round trip time
+# TYPE kafka_synthetic_test_round_trip_time gauge
+kafka_synthetic_test_round_trip_time{id="us-west-1.32",bootstrap_servers="cp-3:9092",topic="kafka-synthetic-test",partition="2",} 24.0
+kafka_synthetic_test_round_trip_time{id="us-west-1.32",bootstrap_servers="cp-3:9092",topic="kafka-synthetic-test",partition="1",} 10.0
+kafka_synthetic_test_round_trip_time{id="us-west-1.32",bootstrap_servers="cp-3:9092",topic="kafka-synthetic-test",partition="0",} 16.0
+```
+
 **Notes**
 
 - A test message is sent to every partition based on the configured `period.ms` value
