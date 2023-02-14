@@ -18,12 +18,17 @@ package com.github.dhoard.kafka;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.PartitionInfo;
+import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -32,17 +37,33 @@ public class MessageConsumer {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSyntheticTest.class);
 
     private final AtomicBoolean closed;
+    private final long periodMs;
     private KafkaConsumer<String, String> kafkaConsumer;
     private final Consumer<ConsumerRecords<String, String>> consumer;
     private final Thread thread;
 
-    public MessageConsumer(Properties consumerProperties, String topic, Consumer<ConsumerRecords<String, String>> consumer) {
+    public MessageConsumer(Properties consumerProperties, String topic, long periodMs, Consumer<ConsumerRecords<String, String>> consumer) {
+        LOGGER.info("starting consumer");
+
         this.closed = new AtomicBoolean();
+        this.periodMs = periodMs;
         this.consumer = consumer;
         this.kafkaConsumer = new KafkaConsumer<>(consumerProperties);
-        this.kafkaConsumer.subscribe(Collections.singleton(topic));
+
+        // Manual partition assignment
+
+        List<TopicPartition> topicPartitionList = new ArrayList<>();
+        List<PartitionInfo> partitionInfoList = this.kafkaConsumer.partitionsFor(topic);
+        for (PartitionInfo partitionInfo : partitionInfoList) {
+            topicPartitionList.add(new TopicPartition(topic, partitionInfo.partition()));
+        }
+
+        this.kafkaConsumer.assign(topicPartitionList);
+        this.kafkaConsumer.seekToEnd(this.kafkaConsumer.assignment());
         this.thread = new Thread(this::consume);
         this.thread.start();
+
+        LOGGER.info("consumer started");
     }
 
     public void close() {
@@ -51,10 +72,8 @@ public class MessageConsumer {
 
     private void consume() {
         while (!closed.get()) {
-            LOGGER.debug("consume()");
-
             try {
-                consumer.accept(kafkaConsumer.poll(Duration.ofSeconds(10)));
+                consumer.accept(kafkaConsumer.poll(periodMs));
             } catch (Throwable t) {
                 t.printStackTrace();
 

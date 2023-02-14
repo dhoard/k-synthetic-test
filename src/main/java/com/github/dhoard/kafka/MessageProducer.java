@@ -37,6 +37,8 @@ public class MessageProducer {
     private boolean closed;
 
     public MessageProducer(Properties properties, String topic, long delay, long period) {
+        LOGGER.info("starting producer");
+
         this.closed = false;
         this.topic = topic;
         this.kafkaProducer = new KafkaProducer<>(properties);
@@ -47,6 +49,8 @@ public class MessageProducer {
                 produce();
             }
         }, delay, period);
+
+        LOGGER.info("producer started");
     }
 
     private synchronized void produce() {
