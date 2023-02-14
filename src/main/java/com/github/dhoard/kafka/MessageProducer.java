@@ -54,28 +54,31 @@ public class MessageProducer {
     }
 
     private synchronized void produce() {
-        LOGGER.debug("produce()");
-
         if (closed) {
             return;
         }
 
-        List<PartitionInfo> partitionInfoList = kafkaProducer.partitionsFor(topic);
-        for (PartitionInfo partitionInfo : partitionInfoList) {
-            long now = System.currentTimeMillis();
+        try {
+            LOGGER.debug("produce()");
+            List<PartitionInfo> partitionInfoList = kafkaProducer.partitionsFor(topic);
+            for (PartitionInfo partitionInfo : partitionInfoList) {
+                long nowMs = System.currentTimeMillis();
 
-            ProducerRecord<String, String> producerRecord =
-                    new ProducerRecord<>(
-                            topic,
-                            partitionInfo.partition(),
-                            null,
-                            String.valueOf(now));
+                ProducerRecord<String, String> producerRecord =
+                        new ProducerRecord<>(
+                                topic,
+                                partitionInfo.partition(),
+                                null,
+                                String.valueOf(nowMs));
 
-            kafkaProducer.send(producerRecord, (recordMetadata, e) -> {
-                if (e != null) {
-                    e.printStackTrace();
-                }
-            });
+                kafkaProducer.send(producerRecord, (recordMetadata, e) -> {
+                    if (e != null) {
+                        LOGGER.error("Exception producing message", e);
+                    }
+                });
+            }
+        } catch (Throwable t) {
+            LOGGER.error("Exception producing message", t);
         }
     }
 

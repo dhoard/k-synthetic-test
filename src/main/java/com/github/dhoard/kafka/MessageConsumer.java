@@ -70,9 +70,10 @@ public class MessageConsumer {
     private void consume() {
         while (!closed.get()) {
             try {
+                LOGGER.debug("consume()");
                 consumer.accept(kafkaConsumer.poll(periodMs));
             } catch (Throwable t) {
-                t.printStackTrace();
+                LOGGER.error("Exception consuming message", t);
 
                 try {
                     Thread.sleep(10000);

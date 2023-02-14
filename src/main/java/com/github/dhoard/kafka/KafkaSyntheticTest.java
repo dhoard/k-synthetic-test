@@ -27,6 +27,7 @@ import java.io.Reader;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, String>> {
 
@@ -49,7 +50,6 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
     private String id;
     private String topic;
     private String bootstrapServers;
-    private String groupId;
     private String httpServerAddress;
     private int httpServerPort;
     private boolean logResponses;
@@ -59,7 +59,7 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
     private HTTPServer httpServer;
 
     public KafkaSyntheticTest() {
-        LOGGER.info(getClass().getSimpleName() + " v" + Information.getVersion());
+        banner(getClass().getSimpleName() + " " + Information.getVersion());
 
         countDownLatch = new CountDownLatch(1);
 
@@ -170,6 +170,8 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
 
         messageProducer = new MessageProducer(producerProperties, topic, delayMs, periodMs);
 
+        LOGGER.info("running");
+
         countDownLatch.await();
 
         httpServer.close();
@@ -179,9 +181,9 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
 
     public void accept(ConsumerRecords<String, String> consumerRecords) {
         for (ConsumerRecord<String, String> consumerRecord : consumerRecords) {
-            long messageTimestamp = Long.parseLong(consumerRecord.value());
-            long now = System.currentTimeMillis();
-            long elapsedTime = now - messageTimestamp;
+            long messageTimestampMs = Long.parseLong(consumerRecord.value());
+            long nowMs = System.currentTimeMillis();
+            long elapsedTimeMs = nowMs - messageTimestampMs;
             String partition = String.valueOf(consumerRecord.partition());
 
             roundTripTimeExpiringGauge
@@ -190,7 +192,7 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
                             bootstrapServers,
                             topic,
                             partition)
-                    .set(elapsedTime);
+                    .set(elapsedTimeMs);
 
             if (logResponses) {
                 LOGGER.info(
@@ -199,8 +201,16 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
                                 id,
                                 bootstrapServers,
                                 topic,
-                                consumerRecord.partition(), elapsedTime));
+                                consumerRecord.partition(), elapsedTimeMs));
             }
         }
+    }
+
+    private void banner(String string) {
+        String line = String.format("%0" + string.length() + "d", 0).replace('0', '-');
+
+        LOGGER.info(line);
+        LOGGER.info(string);
+        LOGGER.info(line);
     }
 }
