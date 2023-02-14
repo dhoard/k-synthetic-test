@@ -20,7 +20,15 @@ Copy `test.properties` and edit to match your environment
 
 Execute `./kafka-synthetic-test.sh <test properties>`
 
+## Metrics
+
 Access Prometheus metrics using `http://<http.server.address>:<http.server.port>`
+
+Example URL (based on `test.properties`:
+
+```
+http://localhost:9191
+```
 
 Example output:
 
