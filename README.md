@@ -13,6 +13,9 @@ mvn clean package
 
 For **each** instance of the application, create topic with a partition count that is equal to the number of Kafka brokers.
 
+- Suggested name is `kafka-synthetic-test-<id>`... where `<id>` matches the `id` in `test.properties`
+
+
 Copy `test.properties` and edit to match your environment
 
 Execute `./kafka-synthetic-test.sh <test properties>`
@@ -31,8 +34,7 @@ kafka_synthetic_test_round_trip_time{id="us-west-1.32",bootstrap_servers="cp-3:9
 
 **Notes**
 
-- This application uses manual partition assignment. You need to create a test topic per application instance
-
+- **This application uses manual partition assignment. You need to create a test topic per application instance**
 
 
 - A test message is sent to every partition based on the configured `period.ms` value
