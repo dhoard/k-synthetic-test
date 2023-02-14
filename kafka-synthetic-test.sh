@@ -6,4 +6,4 @@ then
   exit 1
 fi
 
-java -jar target/kafka-synthetic-test-0.0.2.jar "${1}"
+java -jar target/kafka-synthetic-test-0.0.3.jar "${1}"
