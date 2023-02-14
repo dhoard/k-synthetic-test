@@ -38,7 +38,7 @@ kafka_synthetic_test_round_trip_time{id="us-west-1.32",bootstrap_servers="cp-3:9
 - A test message is sent to every partition based on the configured `period.ms` value
 
 
-- A negative value indicates that a metric hasn't been update within the `metric.expiration.period.ms`
+- A negative value indicates that a metric hasn't been updated within the `metric.expiration.period.ms`
 
 
 - Because the message only contains the produce time, latency will be greater than a real Kafka use case
