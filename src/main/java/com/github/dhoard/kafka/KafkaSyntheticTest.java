@@ -113,7 +113,7 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
 
         roundTripTimeExpiringGauge = new ExpiringGauge.Builder()
                 .name("kafka_synthetic_test_round_trip_time")
-                .help("Kafka synthetic test round trip time. Negative indicates no update within \"metric.expiration.period.ms\"")
+                .help("Kafka synthetic test round trip time. Negative indicates no update within configured \"metric.expiration.period.ms\"")
                 .labelNames("id", "bootstrap.servers".replace(".", "_"), "topic", "partition")
                 .ttl(metricExpirationPeriodMs)
                 .register();
