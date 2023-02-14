@@ -16,7 +16,6 @@
 
 package com.github.dhoard.kafka;
 
-import io.prometheus.client.Gauge;
 import io.prometheus.client.exporter.HTTPServer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -25,9 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
 import java.io.Reader;
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
