@@ -13,7 +13,9 @@ mvn clean package
 
 For **each** instance of the application, create topic with a partition count that is equal to the number of Kafka brokers.
 
-- Suggested name is `kafka-synthetic-test-<id>`... where `<id>` matches the `id` in `test.properties`
+- Example name is `kafka-synthetic-test-<id>`... where `<id>` matches the `id` in `test.properties`
+
+- Example retention time is `600,000` ms (10 minutes) (Old messages are skipped)
 
 
 Copy `test.properties` and edit to match your environment
