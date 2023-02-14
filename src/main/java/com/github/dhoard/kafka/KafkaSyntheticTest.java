@@ -25,6 +25,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
 import java.io.Reader;
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
@@ -56,7 +59,7 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
     private boolean logResponses;
     private MessageProducer messageProducer;
     private MessageConsumer messageConsumer;
-    private Gauge roundTripTimeGauge;
+    private ExpiringGauge roundTripTimeExpiringGauge;
     private HTTPServer httpServer;
 
     public KafkaSyntheticTest() {
@@ -81,11 +84,14 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
         id = configuration.asString("id");
         LOGGER.info(String.format("id [%s]", id));
 
-        long delay = configuration.asLong("delay.ms", 0L);
-        LOGGER.info(String.format("delay.ms [%d]", delay));
+        long delayMs = configuration.asLong("delay.ms", 0L);
+        LOGGER.info(String.format("delay.ms [%d]", delayMs));
 
-        long period = configuration.asLong("period.ms", 10000L);
-        LOGGER.info(String.format("period.ms [%d]", period));
+        long periodMs = configuration.asLong("period.ms", 10000L);
+        LOGGER.info(String.format("period.ms [%d]", periodMs));
+
+        long metricExpirationPeriodMs = configuration.asLong("metric.expiration.period.ms");
+        LOGGER.info(String.format("metric.expiration.period.ms [%s]", metricExpirationPeriodMs));
 
         httpServerAddress = configuration.asString("http.server.address");
         LOGGER.info(String.format("http.server.address [%s]", httpServerAddress));
@@ -109,13 +115,11 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
         topic = configuration.asString("topic");
         LOGGER.info(String.format("topic [%s]", topic));
 
-        groupId = configuration.asString("group.id");
-        LOGGER.info(String.format("group.id [%s]", groupId));
-
-        roundTripTimeGauge = new Gauge.Builder()
+        roundTripTimeExpiringGauge = new ExpiringGauge.Builder()
                 .name("kafka_synthetic_test_round_trip_time")
-                .help("Kafka synthetic test round trip time")
+                .help("Kafka synthetic test round trip time. Negative indicates no update within \"metric.expiration.period.ms\"")
                 .labelNames("id", "bootstrap.servers".replace(".", "_"), "topic", "partition")
+                .ttl(metricExpirationPeriodMs)
                 .register();
 
         httpServer = new HTTPServer.Builder()
@@ -130,6 +134,7 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
         properties.remove("topic");
         properties.remove("delay.ms");
         properties.remove("period.ms");
+        properties.remove("metric.expiration.period.ms");
         properties.remove("http.server.address");
         properties.remove("http.server.port");
         properties.remove("log.responses");
@@ -137,9 +142,21 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
         // Create specific producer and consumer properties with a subset of properties
         // to prevent "These configurations X were supplied but are not used yet" warnings
 
+        Properties consumerProperties = new Properties();
+        consumerProperties.putAll(properties);
+        consumerProperties.remove("acks");
+        consumerProperties.remove("linger.ms");
+        consumerProperties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        consumerProperties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        consumerProperties.remove("key.serializer");
+        consumerProperties.remove("value.serializer");
+
+        messageConsumer = new MessageConsumer(consumerProperties, topic, periodMs,this);
+
         Properties producerProperties = new Properties();
 
         producerProperties.putAll(properties);
+        producerProperties.put("batch.size", "0");
         producerProperties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         producerProperties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
@@ -151,22 +168,11 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
             producerProperties.put("linger.ms", "0");
         }
 
-        producerProperties.remove("group.id");
         producerProperties.remove("key.deserializer");
         producerProperties.remove("value.deserializer");
         producerProperties.remove("session.timeout.ms");
 
-        Properties consumerProperties = new Properties();
-        consumerProperties.putAll(properties);
-        consumerProperties.remove("acks");
-        consumerProperties.remove("linger.ms");
-        consumerProperties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        consumerProperties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        consumerProperties.remove("key.serializer");
-        consumerProperties.remove("value.serializer");
-
-        messageProducer = new MessageProducer(producerProperties, topic, delay, period);
-        messageConsumer = new MessageConsumer(consumerProperties, topic, this);
+        messageProducer = new MessageProducer(producerProperties, topic, delayMs, periodMs);
 
         countDownLatch.await();
 
@@ -182,12 +188,12 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
             long elapsedTime = now - messageTimestamp;
             String partition = String.valueOf(consumerRecord.partition());
 
-            roundTripTimeGauge
+            roundTripTimeExpiringGauge
                     .labels(
-                        id,
-                        bootstrapServers,
-                        topic,
-                        partition)
+                            id,
+                            bootstrapServers,
+                            topic,
+                            partition)
                     .set(elapsedTime);
 
             if (logResponses) {

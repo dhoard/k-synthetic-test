@@ -11,7 +11,7 @@ mvn clean package
 
 ## Run
 
-Create a topic with a partition count that is equal to the number of Kafka brokers.
+For **each** instance of the application, create topic with a partition count that is equal to the number of Kafka brokers.
 
 Copy `test.properties` and edit to match your environment
 
@@ -31,7 +31,14 @@ kafka_synthetic_test_round_trip_time{id="us-west-1.32",bootstrap_servers="cp-3:9
 
 **Notes**
 
+- This application uses manual partition assignment. You need to create a test topic per application instance
+
+
+
 - A test message is sent to every partition based on the configured `period.ms` value
+
+
+- A negative value indicates that a metric hasn't been update within the `metric.expiration.period.ms`
 
 
 - Because the message only contains the produce time, latency will be greater than a real Kafka use case
