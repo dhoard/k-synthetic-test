@@ -36,25 +36,6 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSyntheticTest.class);
 
-    /**
-     * Main method
-     *
-     * @param args
-     * @throws Exception
-     */
-    public static void main(String[] args) throws Exception {
-        if ((args == null) || (args.length != 1)) {
-            System.out.println("Usage: java -jar <jar> <properties>");
-            return;
-        }
-
-        try {
-            new KafkaSyntheticTest().run(args[0]);
-        } catch (ConfigurationException e) {
-            LOGGER.error(e.getMessage());
-        }
-    }
-
     private final CountDownLatch countDownLatch;
     private String id;
     private String topic;
@@ -90,10 +71,9 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
         if ((filename == null) || filename.isBlank()) {
             throw new ConfigurationException("filename argument is required");
         }
-        filename = filename.trim();
 
         Configuration configuration = new Configuration();
-        configuration.load(filename);
+        configuration.load(filename.trim());
 
         id = configuration.asString("id");
         LOGGER.info(String.format("id [%s]", id));
@@ -257,6 +237,25 @@ public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, Stri
                                 topic,
                                 consumerRecord.partition(), elapsedTimeMs));
             }
+        }
+    }
+
+    /**
+     * Main method
+     *
+     * @param args
+     * @throws Exception
+     */
+    public static void main(String[] args) throws Exception {
+        if ((args == null) || (args.length != 1)) {
+            System.out.println("Usage: java -jar <jar> <properties>");
+            return;
+        }
+
+        try {
+            new KafkaSyntheticTest().run(args[0]);
+        } catch (ConfigurationException e) {
+            LOGGER.error(e.getMessage());
         }
     }
 

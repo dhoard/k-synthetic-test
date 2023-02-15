@@ -60,30 +60,32 @@ public class RecordConsumer {
     /**
      * Method to start the consumer
      */
-    public synchronized void start() {
-        if (thread == null) {
-            LOGGER.info("starting consumer");
+    public void start() {
+        synchronized (this) {
+            if (thread == null) {
+                LOGGER.info("starting consumer");
 
-            kafkaConsumer = new KafkaConsumer<>(properties);
+                kafkaConsumer = new KafkaConsumer<>(properties);
 
-            // Manual partition assignment
+                // Manual partition assignment
 
-            topicPartitionList = new ArrayList<>();
+                topicPartitionList = new ArrayList<>();
 
-            List<PartitionInfo> partitionInfoList = kafkaConsumer.partitionsFor(topic);
-            for (PartitionInfo partitionInfo : partitionInfoList) {
-                topicPartitionList.add(new TopicPartition(topic, partitionInfo.partition()));
+                List<PartitionInfo> partitionInfoList = kafkaConsumer.partitionsFor(topic);
+                for (PartitionInfo partitionInfo : partitionInfoList) {
+                    topicPartitionList.add(new TopicPartition(topic, partitionInfo.partition()));
+                }
+
+                kafkaConsumer.assign(topicPartitionList);
+                kafkaConsumer.seekToEnd(kafkaConsumer.assignment());
+
+                countDownLatch = new CountDownLatch(2);
+
+                thread = new Thread(this::poll);
+                thread.start();
+
+                LOGGER.info("consumer started");
             }
-
-            kafkaConsumer.assign(topicPartitionList);
-            kafkaConsumer.seekToEnd(kafkaConsumer.assignment());
-
-            countDownLatch = new CountDownLatch(2);
-
-            thread = new Thread(this::poll);
-            thread.start();
-
-            LOGGER.info("consumer started");
         }
     }
 
@@ -91,20 +93,22 @@ public class RecordConsumer {
      * Method to close the consumer
      */
     public synchronized void close() {
-        if (thread != null) {
-            countDownLatch.countDown();
+        synchronized (this) {
+            if (thread != null) {
+                countDownLatch.countDown();
 
-            try {
-                countDownLatch.await();
-            } catch (InterruptedException e) {
-                // DO NOTHING
+                try {
+                    countDownLatch.await();
+                } catch (InterruptedException e) {
+                    // DO NOTHING
+                }
+
+                kafkaConsumer.close();
+                kafkaConsumer = null;
+
+                thread = null;
+                countDownLatch = null;
             }
-
-            kafkaConsumer.close();
-            kafkaConsumer = null;
-
-            thread = null;
-            countDownLatch = null;
         }
     }
 

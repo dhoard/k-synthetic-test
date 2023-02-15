@@ -215,8 +215,7 @@ public class Configuration {
      * @return
      */
     public Properties toProperties() {
-        Configuration configuration = copy();
-        return configuration.properties;
+        return copy().properties;
     }
 
     /**

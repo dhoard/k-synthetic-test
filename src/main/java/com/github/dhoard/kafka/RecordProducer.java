@@ -59,22 +59,24 @@ public class RecordProducer {
     /**
      * Method to start the producer
      */
-    public synchronized void start() {
-        if (produceTimer == null) {
-            LOGGER.info("starting producer");
+    public void start() {
+        synchronized (this) {
+            if (produceTimer == null) {
+                LOGGER.info("starting producer");
 
-            kafkaProducer = new KafkaProducer<>(properties);
-            partitionInfoList = kafkaProducer.partitionsFor(topic);
+                kafkaProducer = new KafkaProducer<>(properties);
+                partitionInfoList = kafkaProducer.partitionsFor(topic);
 
-            produceTimer = new Timer("producer", true);
-            produceTimer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    produce();
-                }
-            }, delayMs, periodMs);
+                produceTimer = new Timer("producer", true);
+                produceTimer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        produce();
+                    }
+                }, delayMs, periodMs);
 
-            LOGGER.info("producer started");
+                LOGGER.info("producer started");
+            }
         }
     }
 
@@ -82,20 +84,22 @@ public class RecordProducer {
      * Method to close the producer
      */
     public synchronized void close() {
-        if (produceTimer != null) {
-            produceTimer.cancel();
+        synchronized (this) {
+            if (produceTimer != null) {
+                produceTimer.cancel();
 
-            kafkaProducer.close();
-            kafkaProducer = null;
+                kafkaProducer.close();
+                kafkaProducer = null;
 
-            produceTimer = null;
+                produceTimer = null;
+            }
         }
     }
 
     /**
      * Method to produce records
      */
-    private synchronized void produce() {
+    private void produce() {
         LOGGER.debug("produce()");
 
         try {
@@ -109,11 +113,13 @@ public class RecordProducer {
                                 null,
                                 String.valueOf(nowMs));
 
-                kafkaProducer.send(producerRecord, (recordMetadata, e) -> {
-                    if (e != null) {
-                        LOGGER.error("Exception producing record", e);
-                    }
-                });
+                synchronized (this) {
+                    kafkaProducer.send(producerRecord, (recordMetadata, e) -> {
+                        if (e != null) {
+                            LOGGER.error("Exception producing record", e);
+                        }
+                    });
+                }
             }
         } catch (Throwable t) {
             LOGGER.error("Exception producing record", t);
