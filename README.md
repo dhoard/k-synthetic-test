@@ -2,7 +2,7 @@
 
 # K-synthetic-test
 
-KSyntheticTest is a synthetic test application to measure Kafka produce/consume round trip time
+KSyntheticTest is a synthetic test application to measure Kafka produce/consume round trip times
 
 **Because the messages only contains the produce timestamp (Unix epoch), latency will be greater than a real Kafka use case**
 
