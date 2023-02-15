@@ -98,7 +98,7 @@ public class Configuration {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            throw new ConfigurationException("property \"" + key + "\" must be an integer");
+            throw new ConfigurationException("property \"" + key + "\" must be an integer", e);
         }
     }
 
@@ -123,7 +123,7 @@ public class Configuration {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            throw new ConfigurationException("property \"" + key + "\" must be an integer");
+            throw new ConfigurationException("property \"" + key + "\" must be an integer", e);
         }
     }
 
@@ -143,7 +143,7 @@ public class Configuration {
         try {
             return Long.parseLong(value);
         } catch (NumberFormatException e) {
-            throw new ConfigurationException("property \"" + key + "\" must be a long");
+            throw new ConfigurationException("property \"" + key + "\" must be a long", e);
         }
     }
 
@@ -168,7 +168,7 @@ public class Configuration {
         try {
             return Long.parseLong(value);
         } catch (NumberFormatException e) {
-            throw new ConfigurationException("property \"" + key + "\" must be a long");
+            throw new ConfigurationException("property \"" + key + "\" must be a long", e);
         }
     }
 

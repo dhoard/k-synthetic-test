@@ -29,4 +29,14 @@ public class ConfigurationException extends RuntimeException {
     public ConfigurationException(String message) {
         super(message);
     }
+
+    /**
+     * Constructor
+     *
+     * @param message
+     * @param throwable
+     */
+    public ConfigurationException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
 }

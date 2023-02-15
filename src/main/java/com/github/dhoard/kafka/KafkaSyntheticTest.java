@@ -16,12 +16,12 @@
 
 package com.github.dhoard.kafka;
 
+import com.google.common.net.InetAddresses;
+import com.google.common.net.InternetDomainName;
 import com.sun.net.httpserver.BasicAuthenticator;
 import io.prometheus.client.exporter.HTTPServer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import com.google.common.net.InetAddresses;
-import com.google.common.net.InternetDomainName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,6 @@ import java.util.function.Consumer;
 /**
  * Class to implement a synthetic Kafka performance test
  */
-@SuppressWarnings("PMD.PreserveStackTrace")
 public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, String>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSyntheticTest.class);
