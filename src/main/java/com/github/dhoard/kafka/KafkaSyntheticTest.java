@@ -25,13 +25,13 @@ import com.google.common.net.InternetDomainName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
 /**
  * Class to implement a synthetic Kafka performance test
  */
+@SuppressWarnings("PMD.PreserveStackTrace")
 public class KafkaSyntheticTest implements Consumer<ConsumerRecords<String, String>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSyntheticTest.class);
