@@ -1,3 +1,7 @@
+[![Build](https://github.com/dhoard/kafka-synthetic-test/actions/workflows/build.yml/badge.svg)](https://github.com/dhoard/kafka-synthetic-test/actions/workflows/build.yml)
+[![Code Grade](https://api.codiga.io/project/35752/status/svg)](https://app.codiga.io/hub/project/35752/test-engine)
+[![Code Quality](https://api.codiga.io/project/35752/score/svg)](https://app.codiga.io/hub/project/35752/test-engine)
+
 # kafka-synthetic-test
 
 Kafka synthetic test application to measure round trip time.
