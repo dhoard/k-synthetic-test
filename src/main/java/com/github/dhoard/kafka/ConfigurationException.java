@@ -16,10 +16,17 @@
 
 package com.github.dhoard.kafka;
 
+/**
+ * Class to implement a configuration exception
+ */
 public class ConfigurationException extends RuntimeException {
 
+    /**
+     * Constructor
+     *
+     * @param message
+     */
     public ConfigurationException(String message) {
         super(message);
     }
-
 }

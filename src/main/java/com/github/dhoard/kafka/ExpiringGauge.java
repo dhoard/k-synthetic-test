@@ -30,6 +30,9 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Class to implement a gauge that expires data (value = -1.0) if the gauge hasn't been updated within a period
+ */
 public class ExpiringGauge extends SimpleCollector<ExpiringGauge.Child> implements Collector.Describable {
 
     private final long ttl;
