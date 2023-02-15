@@ -92,7 +92,7 @@ public class RecordConsumer {
     /**
      * Method to close the consumer
      */
-    public synchronized void close() {
+    public void close() {
         synchronized (this) {
             if (thread != null) {
                 countDownLatch.countDown();

@@ -83,7 +83,7 @@ public class RecordProducer {
     /**
      * Method to close the producer
      */
-    public synchronized void close() {
+    public void close() {
         synchronized (this) {
             if (produceTimer != null) {
                 produceTimer.cancel();
