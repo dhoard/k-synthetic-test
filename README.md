@@ -59,7 +59,3 @@ kafka_synthetic_test_round_trip_time{id="source-10.0.0.1",bootstrap_servers="cp-
 
 
 - A negative value indicates that a metric hasn't been updated within the configured `metric.expiration.period.ms` value
-
-
-# FOR DEMO PURPOSES ONLY - NOT SUPPORTED
-
