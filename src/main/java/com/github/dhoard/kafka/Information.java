@@ -20,23 +20,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Class to get application information
+ */
 public final class Information {
 
     private static final String RESOURCE_PATH = "/kafka-synthetic-test.properties";
 
     /**
-     * Method to get the TestEngine version
-     *
-     * @return
+     * Constructor
      */
-    public static String getVersion() {
-        return getProperty("version", "Unknown");
-    }
-
     private Information() {
         // DO NOTHING
     }
 
+    /**
+     * Method to get a specific property from the application properties
+     *
+     * @param key
+     * @param defaultValue
+     * @return
+     */
     private static String getProperty(String key, String defaultValue) {
         String value = defaultValue;
 
@@ -51,5 +55,14 @@ public final class Information {
         }
 
         return value;
+    }
+
+    /**
+     * Method to get the application version
+     *
+     * @return
+     */
+    public static String getVersion() {
+        return getProperty("version", "Unknown");
     }
 }

@@ -16,16 +16,78 @@
 
 package com.github.dhoard.kafka;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.Properties;
 
+/**
+ * Class to implement configuration
+ */
 public class Configuration {
 
     private Properties properties;
 
-    public Configuration(Properties properties) {
+    /**
+     * Constructor
+     */
+    public Configuration() {
+        properties = new Properties();
+    }
+
+    /**
+     * Method to load Properties from a file
+     *
+     * @param filename
+     */
+    public void load(String filename) throws IOException {
+        Properties properties = new Properties();
+
+        try (Reader reader = new FileReader(filename)) {
+            properties.load(reader);
+        }
+
         this.properties = properties;
     }
 
+    /**
+     * Method to determine if a key exists
+     *
+     * @param key
+     * @return
+     */
+    public boolean containsKey(String key) {
+        return properties.containsKey(key);
+    }
+
+    /**
+     * Method to put a key / value
+     *
+     * @param key
+     * @param value
+     * @return
+     */
+    public String put(String key, String value) {
+        properties.put(key, value);
+        return value;
+    }
+
+    /**
+     * Method to remove a key, returning the value
+     *
+     * @param key
+     * @return
+     */
+    public String remove(String key) {
+        return (String) properties.remove(key);
+    }
+
+    /**
+     * Method to get a required value as an int
+     *
+     * @param key
+     * @return
+     */
     public int asInt(String key) {
         String value = properties.getProperty(key);
 
@@ -40,6 +102,13 @@ public class Configuration {
         }
     }
 
+    /**
+     * Method to get an optional value as an int
+     *
+     * @param key
+     * @param defaultValue
+     * @return
+     */
     public int asInt(String key, int defaultValue) {
         String value = properties.getProperty(key);
 
@@ -58,6 +127,12 @@ public class Configuration {
         }
     }
 
+    /**
+     * Method to get a required value as a long
+     *
+     * @param key
+     * @return
+     */
     public long asLong(String key) {
         String value = properties.getProperty(key);
 
@@ -72,6 +147,13 @@ public class Configuration {
         }
     }
 
+    /**
+     * Method to get an optional value as a long
+     *
+     * @param key
+     * @param defaultValue
+     * @return
+     */
     public long asLong(String key, long defaultValue) {
         String value = properties.getProperty(key);
 
@@ -90,6 +172,12 @@ public class Configuration {
         }
     }
 
+    /**
+     * Method to get a required value as a String
+     *
+     * @param key
+     * @return
+     */
     public String asString(String key) {
         String value = properties.getProperty(key);
 
@@ -100,6 +188,13 @@ public class Configuration {
         return value.trim();
     }
 
+    /**
+     * Method to get an optional value as a String
+     *
+     * @param key
+     * @param defaultValue
+     * @return
+     */
     public String asString(String key, String defaultValue) {
         String value = properties.getProperty(key);
 
@@ -112,5 +207,26 @@ public class Configuration {
         }
 
         return value.trim();
+    }
+
+    /**
+     * Method to return Properties (deep copy)
+     *
+     * @return
+     */
+    public Properties toProperties() {
+        Configuration configuration = copy();
+        return configuration.properties;
+    }
+
+    /**
+     * Method to copy the Configuration object (deep copy)
+     *
+     * @return
+     */
+    public Configuration copy() {
+        Configuration configuration = new Configuration();
+        configuration.properties.putAll(this.properties);
+        return configuration;
     }
 }
