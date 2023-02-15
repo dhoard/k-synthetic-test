@@ -1,10 +1,8 @@
-[![Build](https://github.com/dhoard/kafka-synthetic-test/actions/workflows/build.yml/badge.svg)](https://github.com/dhoard/kafka-synthetic-test/actions/workflows/build.yml)
-[![Code Grade](https://api.codiga.io/project/35752/status/svg)](https://app.codiga.io/hub/project/35752/test-engine)
-[![Code Quality](https://api.codiga.io/project/35752/score/svg)](https://app.codiga.io/hub/project/35752/test-engine)
+[![Build](https://github.com/dhoard/k-synthetic-test/actions/workflows/build.yml/badge.svg)](https://github.com/dhoard/k-synthetic-test/actions/workflows/build.yml)
 
-# kafka-synthetic-test
+# K-synthetic-test
 
-Kafka synthetic test application to measure round trip time.
+KSyntheticTest test application to measure Kafka produce/consume round trip time
 
 **Because the messages only contains the produce timestamp (Unix epoch), latency will be greater than a real Kafka use case**
 
