@@ -1,6 +1,6 @@
 [![Build](https://github.com/dhoard/k-synthetic-test/actions/workflows/build.yml/badge.svg)](https://github.com/dhoard/k-synthetic-test/actions/workflows/build.yml)
 
-# K-synthetic-test
+# k-synthetic-test
 
 KSyntheticTest is a synthetic test application to measure Kafka produce/consume round trip times
 
