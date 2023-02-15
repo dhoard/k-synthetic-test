@@ -6,7 +6,7 @@
 
 Kafka synthetic test application to measure round trip time.
 
-**Because the message only contains the produce timestamp (Unix epoch), latency will be greater than a real Kafka use case**
+**Because the messages only contains the produce timestamp (Unix epoch), latency will be greater than a real Kafka use case**
 
 ## Build
 
