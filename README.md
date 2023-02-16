@@ -89,7 +89,10 @@ java -jar target/k-synthetic-test-0.0.6.jar configuration/test.properties
 
 **NOTES**
 
-Other configuration examples can be found at https://github.com/dhoard/k-synthetic-test/configuration
+- Other configuration examples can be found at https://github.com/dhoard/k-synthetic-test/configuration
+
+
+- If you enable HTTPS (`http.server.ssl.enabled=true`) you need to provide `-Djavax.net.ssl.keyStore` and `-Djavax.net.ssl.keyStorePassword` properties
 
 ## Metrics
 
