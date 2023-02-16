@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.dhoard.kafka;
+package com.github.dhoard.k.synthetic.test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +25,7 @@ import java.util.Properties;
  */
 public final class Information {
 
-    private static final String RESOURCE_PATH = "/kafka-synthetic-test.properties";
+    private static final String RESOURCE_PATH = "/k-synthetic-test.properties";
 
     /**
      * Constructor

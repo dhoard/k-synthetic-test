@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.dhoard.kafka;
+package com.github.dhoard.k.synthetic.test;
 
 /**
  * Class to implement a configuration exception
@@ -28,5 +28,15 @@ public class ConfigurationException extends RuntimeException {
      */
     public ConfigurationException(String message) {
         super(message);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param message
+     * @param throwable
+     */
+    public ConfigurationException(String message, Throwable throwable) {
+        super(message, throwable);
     }
 }

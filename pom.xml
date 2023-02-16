@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.dhoard</groupId>
-    <artifactId>kafka-synthetic-test</artifactId>
-    <version>0.0.4</version>
+    <artifactId>k-synthetic-test</artifactId>
+    <version>0.0.5</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,14 +19,14 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
-                    <include>**/kafka-synthetic-test.properties</include>
+                    <include>**/k-synthetic-test.properties</include>
                 </includes>
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>false</filtering>
                 <excludes>
-                    <exclude>**/kafka-synthetic-test.properties</exclude>
+                    <exclude>**/k-synthetic-test.properties</exclude>
                 </excludes>
             </resource>
         </resources>
@@ -62,7 +62,7 @@
                               <transformers>
                                   <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                       <manifestEntries>
-                                          <Main-Class>com.github.dhoard.kafka.KafkaSyntheticTest</Main-Class>
+                                          <Main-Class>com.github.dhoard.k.synthetic.test.KSyntheticTest</Main-Class>
                                           <Build-Number>1.0</Build-Number>
                                       </manifestEntries>
                                   </transformer>
@@ -104,6 +104,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>31.1-jre</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.hakky54</groupId>
+            <artifactId>sslcontext-kickstart</artifactId>
+            <version>7.4.9</version>
         </dependency>
     </dependencies>
 
