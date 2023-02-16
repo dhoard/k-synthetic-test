@@ -1,5 +1,5 @@
 [![Build](https://github.com/dhoard/k-synthetic-test/actions/workflows/build.yml/badge.svg)](https://github.com/dhoard/k-synthetic-test/actions/workflows/build.yml)
-[![Code Grade](https://api.codiga.io/project/35752/score/svg)](https://app.codiga.io/hub/project/35752/k-synthetic-test)
+[![Code Grade](https://api.codiga.io/project/35752/status/svg)](https://app.codiga.io/hub/project/35752/k-synthetic-test)
 [![Code Quality](https://api.codiga.io/project/35752/score/svg)](https://app.codiga.io/hub/project/35752/k-synthetic-test)
 
 # k-synthetic-test
