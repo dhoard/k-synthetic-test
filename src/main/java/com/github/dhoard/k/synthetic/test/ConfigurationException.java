@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.dhoard.kafka;
+package com.github.dhoard.k.synthetic.test;
 
 /**
  * Class to implement a configuration exception

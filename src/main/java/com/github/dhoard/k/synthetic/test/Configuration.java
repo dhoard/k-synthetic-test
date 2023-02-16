@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.dhoard.kafka;
+package com.github.dhoard.k.synthetic.test;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -83,6 +83,43 @@ public class Configuration {
     }
 
     /**
+     * Method to get a required value as a boolean
+     *
+     * @param key
+     * @return
+     */
+    public boolean asBoolean(String key) {
+        String value = properties.getProperty(key);
+
+        if ((value == null) || value.isBlank()) {
+            throw new ConfigurationException("property \"" + key + "\" is required");
+        }
+
+        return value.trim().equalsIgnoreCase("T") || value.trim().equalsIgnoreCase("TRUE");
+    }
+
+    /**
+     * Method to get an optional value as a boolean
+     *
+     * @param key
+     * @return
+     */
+    public boolean asBoolean(String key, boolean defaultValue) {
+        String value = properties.getProperty(key);
+
+        if (value == null) {
+            return defaultValue;
+        }
+
+        if (value.isBlank()) {
+            throw new ConfigurationException("property \"" + key + "\" is required");
+        }
+
+        return value.trim().equalsIgnoreCase("T") || value.trim().equalsIgnoreCase("TRUE");
+    }
+
+
+    /**
      * Method to get a required value as an int
      *
      * @param key
@@ -96,7 +133,7 @@ public class Configuration {
         }
 
         try {
-            return Integer.parseInt(value);
+            return Integer.parseInt(value.trim());
         } catch (NumberFormatException e) {
             throw new ConfigurationException("property \"" + key + "\" must be an integer", e);
         }
@@ -141,7 +178,7 @@ public class Configuration {
         }
 
         try {
-            return Long.parseLong(value);
+            return Long.parseLong(value.trim());
         } catch (NumberFormatException e) {
             throw new ConfigurationException("property \"" + key + "\" must be a long", e);
         }
@@ -154,7 +191,7 @@ public class Configuration {
      * @param defaultValue
      * @return
      */
-    public long asLong(String key, long defaultValue) {
+    public Long asLong(String key, long defaultValue) {
         String value = properties.getProperty(key);
 
         if (value == null) {
@@ -166,7 +203,7 @@ public class Configuration {
         }
 
         try {
-            return Long.parseLong(value);
+            return Long.parseLong(value.trim());
         } catch (NumberFormatException e) {
             throw new ConfigurationException("property \"" + key + "\" must be a long", e);
         }

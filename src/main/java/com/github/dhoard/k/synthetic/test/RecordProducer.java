@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.dhoard.kafka;
+package com.github.dhoard.k.synthetic.test;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
