@@ -17,6 +17,10 @@ mvn clean package
 
 You need to create a unique test topic per application instance with enough partitions to span all brokers
 
+### Self-Managed Kafka
+
+The configuration `test.properties` in https://github.com/dhoard/k-synthetic-test/blob/main/configuration/test.properties should be self-explanatory
+
 ### Confluent Cloud
 
 **Step 1**
@@ -59,7 +63,7 @@ kcat -b ${CCLOUD_BROKERS} -L \
 
 
 - Example topic name is `k-synthetic-test-<id>`
-  - where `<id>` matches the `id` in test properties
+  - where `<id>` matches the `id` in your test properties
 
 
 - Example retention time is `300,000` ms (5 minutes)
