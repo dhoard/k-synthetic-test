@@ -6,7 +6,7 @@
 
     <groupId>com.github.dhoard</groupId>
     <artifactId>k-synthetic-test</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
