@@ -17,6 +17,9 @@ mvn clean package
 
 You need to create a unique test topic per application instance with enough partitions to span all brokers
 
+- topic partition count increases are automatically handled
+- It may take up to 60000 ms to reflect the new topic partition count
+
 ### Self-Managed Kafka
 
 The configuration `test.properties` in https://github.com/dhoard/k-synthetic-test/blob/main/configuration/test.properties should be self-explanatory
@@ -81,7 +84,7 @@ Copy `configuration/test.properties` and edit to match your environment
 Run
 
 ```shell
-java -jar target/k-synthetic-test-0.0.5.jar configuration/test.properties
+java -jar target/k-synthetic-test-0.0.6.jar configuration/test.properties
 ```
 
 **NOTES**

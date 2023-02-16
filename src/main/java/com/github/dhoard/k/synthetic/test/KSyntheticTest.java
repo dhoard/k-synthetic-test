@@ -58,9 +58,7 @@ public class KSyntheticTest implements Consumer<ConsumerRecords<String, String>>
 
         countDownLatch = new CountDownLatch(1);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            countDownLatch.countDown();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> countDownLatch.countDown()));
     }
 
     /**
@@ -190,6 +188,7 @@ public class KSyntheticTest implements Consumer<ConsumerRecords<String, String>>
         // to prevent "These configurations X were supplied but are not used yet" warnings
 
         Configuration consumerConfiguration = configuration.copy();
+        consumerConfiguration.put("metadata.max.age.ms", "60000");
         consumerConfiguration.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         consumerConfiguration.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         consumerConfiguration.remove("acks");
@@ -201,6 +200,7 @@ public class KSyntheticTest implements Consumer<ConsumerRecords<String, String>>
         messageConsumer.start();
 
         Configuration producerConfiguration = configuration.copy();
+        producerConfiguration.put("metadata.max.age.ms", "60000");
         producerConfiguration.remove("key.deserializer");
         producerConfiguration.remove("value.deserializer");
         producerConfiguration.remove("session.timeout.ms");

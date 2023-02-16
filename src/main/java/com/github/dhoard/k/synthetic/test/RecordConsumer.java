@@ -24,9 +24,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
@@ -45,6 +50,8 @@ public class RecordConsumer {
     private Thread thread;
     private CountDownLatch countDownLatch;
     private KafkaConsumer<String, String> kafkaConsumer;
+
+    private Timer assignPartitionsTimer;
 
     /**
      * Constructor
@@ -68,22 +75,20 @@ public class RecordConsumer {
 
                 kafkaConsumer = new KafkaConsumer<>(properties);
 
-                // Manual partition assignment
-
-                List<TopicPartition> topicPartitionList = new ArrayList<>();
-
-                List<PartitionInfo> partitionInfoList = kafkaConsumer.partitionsFor(topic);
-                for (PartitionInfo partitionInfo : partitionInfoList) {
-                    topicPartitionList.add(new TopicPartition(topic, partitionInfo.partition()));
-                }
-
-                kafkaConsumer.assign(topicPartitionList);
-                kafkaConsumer.seekToEnd(kafkaConsumer.assignment());
+                assignPartitions();
 
                 countDownLatch = new CountDownLatch(2);
 
                 thread = new Thread(this::poll);
                 thread.start();
+
+                assignPartitionsTimer = new Timer("assignment", true);
+                assignPartitionsTimer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        assignPartitions();
+                    }
+                }, 0, 10000);
 
                 LOGGER.info("consumer started");
             }
@@ -104,11 +109,34 @@ public class RecordConsumer {
                     // DO NOTHING
                 }
 
+                assignPartitionsTimer.cancel();
+                assignPartitionsTimer = null;
+
                 kafkaConsumer.close();
                 kafkaConsumer = null;
 
                 thread = null;
                 countDownLatch = null;
+            }
+        }
+    }
+    private void assignPartitions() {
+        LOGGER.debug("assignPartitions()");
+
+        synchronized (kafkaConsumer) {
+            Set<TopicPartition> topicPartitionSet = new TreeSet<>(Comparator.comparingInt(TopicPartition::partition));
+
+            List<PartitionInfo> partitionInfoList = kafkaConsumer.partitionsFor(topic);
+            for (PartitionInfo partitionInfo : partitionInfoList) {
+                topicPartitionSet.add(new TopicPartition(topic, partitionInfo.partition()));
+            }
+
+            Set<TopicPartition> existingTopicPartitionSet = kafkaConsumer.assignment();
+
+            if (!Objects.equals(topicPartitionSet, existingTopicPartitionSet)) {
+                LOGGER.debug("reassigning consumer partitions");
+                kafkaConsumer.assign(topicPartitionSet);
+                kafkaConsumer.seekToEnd(kafkaConsumer.assignment());
             }
         }
     }

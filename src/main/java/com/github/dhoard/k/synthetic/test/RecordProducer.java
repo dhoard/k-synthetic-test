@@ -19,13 +19,18 @@ package com.github.dhoard.k.synthetic.test;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.PartitionInfo;
+import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeSet;
 
 /**
  * Class to produce records
@@ -39,8 +44,10 @@ public class RecordProducer {
     private final long periodMs;
     private final String topic;
     private KafkaProducer<String, String> kafkaProducer;
-    private List<PartitionInfo> partitionInfoList;
+    private Set<TopicPartition> topicPartitionSet;
     private Timer produceTimer;
+    private Timer assignPartitionsTimer;
+
 
     /**
      * Constructor
@@ -64,8 +71,9 @@ public class RecordProducer {
             if (produceTimer == null) {
                 LOGGER.info("starting producer");
 
+                topicPartitionSet = new TreeSet<>(Comparator.comparingInt(TopicPartition::partition));
+
                 kafkaProducer = new KafkaProducer<>(properties);
-                partitionInfoList = kafkaProducer.partitionsFor(topic);
 
                 produceTimer = new Timer("producer", true);
                 produceTimer.scheduleAtFixedRate(new TimerTask() {
@@ -74,6 +82,14 @@ public class RecordProducer {
                         produce();
                     }
                 }, delayMs, periodMs);
+
+                assignPartitionsTimer = new Timer("assignment", true);
+                assignPartitionsTimer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        assignPartitions();
+                    }
+                }, 0, 10000);
 
                 LOGGER.info("producer started");
             }
@@ -96,6 +112,24 @@ public class RecordProducer {
         }
     }
 
+    private void assignPartitions() {
+        LOGGER.debug("assignPartitions()");
+
+        synchronized (kafkaProducer) {
+            Set<TopicPartition> newTopicPartitionSet = new TreeSet<>(Comparator.comparingInt(TopicPartition::partition));
+
+            List<PartitionInfo> partitionInfoList = kafkaProducer.partitionsFor(topic);
+            for (PartitionInfo partitionInfo : partitionInfoList) {
+                newTopicPartitionSet.add(new TopicPartition(topic, partitionInfo.partition()));
+            }
+
+            if (!Objects.equals(topicPartitionSet, newTopicPartitionSet)) {
+                LOGGER.debug("reassigning producer partitions");
+                topicPartitionSet = newTopicPartitionSet;
+            }
+        }
+    }
+
     /**
      * Method to produce records
      */
@@ -103,17 +137,17 @@ public class RecordProducer {
         LOGGER.debug("produce()");
 
         try {
-            for (PartitionInfo partitionInfo : partitionInfoList) {
-                long nowMs = System.currentTimeMillis();
+            synchronized (this) {
+                for (TopicPartition topicPartition : topicPartitionSet) {
+                    long nowMs = System.currentTimeMillis();
 
-                ProducerRecord<String, String> producerRecord =
-                        new ProducerRecord<>(
-                                topic,
-                                partitionInfo.partition(),
-                                null,
-                                String.valueOf(nowMs));
+                    ProducerRecord<String, String> producerRecord =
+                            new ProducerRecord<>(
+                                    topic,
+                                    topicPartition.partition(),
+                                    null,
+                                    String.valueOf(nowMs));
 
-                synchronized (this) {
                     kafkaProducer.send(producerRecord, (recordMetadata, e) -> {
                         if (e != null) {
                             LOGGER.error("Exception producing record", e);
