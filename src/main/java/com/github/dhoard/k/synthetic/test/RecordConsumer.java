@@ -23,10 +23,12 @@ import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -43,7 +45,6 @@ public class RecordConsumer {
     private Thread thread;
     private CountDownLatch countDownLatch;
     private KafkaConsumer<String, String> kafkaConsumer;
-    private List<TopicPartition> topicPartitionList;
 
     /**
      * Constructor
@@ -60,7 +61,7 @@ public class RecordConsumer {
     /**
      * Method to start the consumer
      */
-    public void start() {
+    public void start() throws InterruptedException, ExecutionException {
         synchronized (this) {
             if (thread == null) {
                 LOGGER.info("starting consumer");
@@ -69,7 +70,7 @@ public class RecordConsumer {
 
                 // Manual partition assignment
 
-                topicPartitionList = new ArrayList<>();
+                List<TopicPartition> topicPartitionList = new ArrayList<>();
 
                 List<PartitionInfo> partitionInfoList = kafkaConsumer.partitionsFor(topic);
                 for (PartitionInfo partitionInfo : partitionInfoList) {
@@ -121,7 +122,7 @@ public class RecordConsumer {
         while (countDownLatch.getCount() == 2) {
             try {
                 synchronized (kafkaConsumer) {
-                    consumer.accept(kafkaConsumer.poll(10000));
+                    consumer.accept(kafkaConsumer.poll(Duration.ofMillis(10000)));
                 }
             } catch (Throwable t) {
                 LOGGER.error("Exception consuming message", t);

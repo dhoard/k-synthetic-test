@@ -28,9 +28,7 @@ Confluent Cloud client configuration
 3. Select your cluster
 4. Using the left menu, select `Java clients`
 5. Create a new API key / secret (if required)
-6. Copy the properties and merge them into your `test.properties`
-
-Merge properties into your `test.properties`
+6. Copy the properties and merge them into your `test.confluent-cloud.properties`
 
 **Step 2**
 
@@ -61,7 +59,7 @@ kcat -b ${CCLOUD_BROKERS} -L \
 
 
 - Example topic name is `k-synthetic-test-<id>`
-  - where `<id>` matches the `id` in `test.properties`
+  - where `<id>` matches the `id` in test properties
 
 
 - Example retention time is `300,000` ms (5 minutes)
@@ -79,7 +77,7 @@ Copy `configuration/test.properties` and edit to match your environment
 Run
 
 ```shell
-java -jar k-synthetic-test-0.0.5.jar test.properties
+java -jar target/k-synthetic-test-0.0.5.jar configuration/test.properties
 ```
 
 **NOTES**

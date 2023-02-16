@@ -148,7 +148,6 @@ public class KSyntheticTest implements Consumer<ConsumerRecords<String, String>>
             SSLFactory sslFactory =
                     SSLFactory.builder()
                             .withSystemPropertyDerivedIdentityMaterial()
-                            .withSystemPropertyDerivedTrustMaterial()
                             .withIdentityRoute(certificateAlias, "https://" + httpServerAddress + ":" + httpServerPort)
                             .build();
 
