@@ -101,11 +101,11 @@ http://localhost:9191
 Example output:
 
 ```
-# HELP kafka_synthetic_test_round_trip_time Kafka synthetic test round trip time
-# TYPE kafka_synthetic_test_round_trip_time gauge
-kafka_synthetic_test_round_trip_time{id="source-10.0.0.1",bootstrap_servers="cp-3:9092",topic="k-synthetic-test",partition="0",} 6.0
-kafka_synthetic_test_round_trip_time{id="source-10.0.0.1",bootstrap_servers="cp-3:9092",topic="k-synthetic-test",partition="1",} 7.0
-kafka_synthetic_test_round_trip_time{id="source-10.0.0.1",bootstrap_servers="cp-3:9092",topic="k-synthetic-test",partition="2",} 9.0
+# HELP k_synthetic_test_round_trip_time Kafka synthetic test round trip time. Negative indicates no update within the configured "metric.expiration.period.ms" period
+# TYPE k_synthetic_test_round_trip_time gauge
+k_synthetic_test_round_trip_time{id="source-10.0.0.1",bootstrap_servers="cp-1:9092,cp-2:9092,cp-3:9092",topic="k-synthetic-test-source-10.0.0.1",partition="2",} 8.0
+k_synthetic_test_round_trip_time{id="source-10.0.0.1",bootstrap_servers="cp-1:9092,cp-2:9092,cp-3:9092",topic="k-synthetic-test-source-10.0.0.1",partition="1",} 9.0
+k_synthetic_test_round_trip_time{id="source-10.0.0.1",bootstrap_servers="cp-1:9092,cp-2:9092,cp-3:9092",topic="k-synthetic-test-source-10.0.0.1",partition="0",} 9.0
 ```
 
 **Notes**
