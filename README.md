@@ -81,7 +81,7 @@ Copy `configuration/test.properties` and edit to match your environment
 Run
 
 ```shell
-java -jar target/k-synthetic-test-0.0.5.jar configuration/test.properties
+java -jar target/k-synthetic-test-0.0.6.jar configuration/test.properties
 ```
 
 **NOTES**

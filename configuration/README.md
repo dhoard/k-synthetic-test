@@ -16,7 +16,7 @@ Configuration scenario
 Usage
 
 ```shell
-java -jar target/k-synthetic-test-0.0.5.jar configuration/test.properties 
+java -jar target/k-synthetic-test-0.0.6.jar configuration/test.properties 
 ```
 
 ---
@@ -36,7 +36,7 @@ Configuration scenario
 java \
   -Djavax.net.ssl.keyStore=configuration/keystore.pkcs12 \
   -Djavax.net.ssl.keyStorePassword=changeit \
-  -jar target/k-synthetic-test-0.0.5.jar configuration/test.ssl.properties 
+  -jar target/k-synthetic-test-0.0.6.jar configuration/test.ssl.properties 
 ```
 
 ---
@@ -56,5 +56,5 @@ Configuration scenario
 java \
   -Djavax.net.ssl.keyStore=configuration/keystore.pkcs12 \
   -Djavax.net.ssl.keyStorePassword=changeit \
-  -jar target/k-synthetic-test-0.0.5.jar configuration/test.confluent-cloud.properties 
+  -jar target/k-synthetic-test-0.0.6.jar configuration/test.confluent-cloud.properties 
 ```
