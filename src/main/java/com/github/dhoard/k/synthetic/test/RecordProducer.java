@@ -32,7 +32,7 @@ public class RecordProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecordProducer.class);
 
-    private String id;
+    private final String id;
     private final Properties properties;
     private final long delayMs;
     private final long periodMs;

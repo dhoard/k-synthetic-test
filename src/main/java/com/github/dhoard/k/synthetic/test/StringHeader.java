@@ -24,10 +24,10 @@ import java.util.Objects;
 /**
  * Class to implement a String based Kafka Header
  */
-public class StringHeader implements Header {
+public final class StringHeader implements Header {
 
-    private String key;
-    private byte[] value;
+    private final String key;
+    private final byte[] value;
 
     private StringHeader(String key, String value) {
         this.key = key;
