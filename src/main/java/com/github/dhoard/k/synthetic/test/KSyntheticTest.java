@@ -43,13 +43,8 @@ public class KSyntheticTest implements Consumer<ConsumerRecord<String, String>> 
     private String id;
     private String topic;
     private String bootstrapServers;
-    private String httpServerAddress;
-    private int httpServerPort;
     private boolean logResponses;
-    private RecordProducer recordProducer;
-    private RecordConsumer recordConsumer;
     private ExpiringGauge roundTripTimeExpiringGauge;
-    private HTTPServer httpServer;
 
     /**
      * Constructor
@@ -59,7 +54,7 @@ public class KSyntheticTest implements Consumer<ConsumerRecord<String, String>> 
 
         countDownLatch = new CountDownLatch(1);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> countDownLatch.countDown()));
+        Runtime.getRuntime().addShutdownHook(new Thread(countDownLatch::countDown));
     }
 
     /**
@@ -100,13 +95,13 @@ public class KSyntheticTest implements Consumer<ConsumerRecord<String, String>> 
         logResponses = configuration.asBoolean("log.responses", false);
         LOGGER.info(String.format("log.responses [%b]", logResponses));
 
-        httpServerAddress = configuration.asString("http.server.address");
+        String httpServerAddress = configuration.asString("http.server.address");
         if (!InetAddresses.isUriInetAddress(httpServerAddress) && !InternetDomainName.isValid(httpServerAddress)) {
             throw new ConfigurationException("property \"http.server.address\" doesn't appear to be an IP address or host name");
         }
         LOGGER.info(String.format("http.server.address [%s]", httpServerAddress));
 
-        httpServerPort = configuration.asInt("http.server.port");
+        int httpServerPort = configuration.asInt("http.server.port");
         if (httpServerPort < 1 || httpServerPort > 65535) {
             throw new ConfigurationException("property \"http.server.port\" must be >= 1 and <= 65535");
         }
@@ -168,7 +163,7 @@ public class KSyntheticTest implements Consumer<ConsumerRecord<String, String>> 
                 .ttl(metricExpirationPeriodMs)
                 .register();
 
-        httpServer = httpServerBuilder.build();
+        HTTPServer httpServer = httpServerBuilder.build();
 
         // Remove general test properties
 
@@ -197,7 +192,7 @@ public class KSyntheticTest implements Consumer<ConsumerRecord<String, String>> 
         recordConsumerConfiguration.remove("key.serializer");
         recordConsumerConfiguration.remove("value.serializer");
 
-        recordConsumer = new RecordConsumer(recordConsumerConfiguration, this);
+        RecordConsumer recordConsumer = new RecordConsumer(recordConsumerConfiguration, this);
         recordConsumer.start();
 
         Configuration recordProducerConfiguration = configuration.copy();
@@ -217,7 +212,7 @@ public class KSyntheticTest implements Consumer<ConsumerRecord<String, String>> 
             recordProducerConfiguration.put("linger.ms", "0");
         }
 
-        recordProducer = new RecordProducer(id, delayMs, periodMs, recordProducerConfiguration);
+        RecordProducer recordProducer = new RecordProducer(id, delayMs, periodMs, recordProducerConfiguration);
         recordProducer.start();
 
         LOGGER.info("running");
@@ -230,7 +225,7 @@ public class KSyntheticTest implements Consumer<ConsumerRecord<String, String>> 
     }
 
     /**
-     * Method to process a ConsumerRecord
+     * Method to accept a ConsumerRecord
      *
      * @param consumerRecord
      */
@@ -240,32 +235,41 @@ public class KSyntheticTest implements Consumer<ConsumerRecord<String, String>> 
             if ("id".equals(header.key())) {
                 String value = new String(header.value(), StandardCharsets.UTF_8);
                 if (id.equals(value)) {
-                    long recordValueTimestampMs = Long.parseLong(consumerRecord.value());
-                    long nowMs = System.currentTimeMillis();
-                    long elapsedTimeMs = nowMs - recordValueTimestampMs;
-                    String partition = String.valueOf(consumerRecord.partition());
-
-                    roundTripTimeExpiringGauge
-                            .labels(
-                                    id,
-                                    bootstrapServers,
-                                    topic,
-                                    partition)
-                            .set(elapsedTimeMs);
-
-                    if (logResponses) {
-                        LOGGER.info(
-                                String.format(
-                                        "id [%s] bootstrap.servers [%s] topic [%s] partition [%d] round trip time [%d] ms",
-                                        id,
-                                        bootstrapServers,
-                                        topic,
-                                        consumerRecord.partition(), elapsedTimeMs));
-                    }
+                    process(consumerRecord);
                 }
 
                 break;
             }
+        }
+    }
+
+    /**
+     * Method to process a ConsumerRecord
+     *
+     * @param consumerRecord
+     */
+    private void process(ConsumerRecord<String, String> consumerRecord) {
+        long recordValueTimestampMs = Long.parseLong(consumerRecord.value());
+        long nowMs = System.currentTimeMillis();
+        long elapsedTimeMs = nowMs - recordValueTimestampMs;
+        String partition = String.valueOf(consumerRecord.partition());
+
+        roundTripTimeExpiringGauge
+                .labels(
+                        id,
+                        bootstrapServers,
+                        topic,
+                        partition)
+                .set(elapsedTimeMs);
+
+        if (logResponses) {
+            LOGGER.info(
+                    String.format(
+                            "id [%s] bootstrap.servers [%s] topic [%s] partition [%d] round trip time [%d] ms",
+                            id,
+                            bootstrapServers,
+                            topic,
+                            consumerRecord.partition(), elapsedTimeMs));
         }
     }
 
