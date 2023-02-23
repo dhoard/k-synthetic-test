@@ -23,14 +23,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Class to produce records
@@ -39,6 +32,7 @@ public class RecordProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecordProducer.class);
 
+    private final String id;
     private final Properties properties;
     private final long delayMs;
     private final long periodMs;
@@ -48,16 +42,16 @@ public class RecordProducer {
     private Timer produceTimer;
     private Timer assignPartitionsTimer;
 
-
     /**
      * Constructor
      *
-     * @param properties
      * @param delayMs
      * @param periodMs
+     * @param configuration
      */
-    public RecordProducer(Properties properties, long delayMs, long periodMs) {
-        this.properties = properties;
+    public RecordProducer(String id, long delayMs, long periodMs, Configuration configuration) {
+        this.id = id;
+        this.properties = configuration.toProperties();
         this.delayMs = delayMs;
         this.periodMs = periodMs;
         this.topic = (String) properties.remove("topic");
@@ -138,6 +132,8 @@ public class RecordProducer {
 
         try {
             synchronized (this) {
+                StringHeader stringHeader = StringHeader.of("id", id);
+
                 for (TopicPartition topicPartition : topicPartitionSet) {
                     long nowMs = System.currentTimeMillis();
 
@@ -147,6 +143,8 @@ public class RecordProducer {
                                     topicPartition.partition(),
                                     null,
                                     String.valueOf(nowMs));
+
+                    producerRecord.headers().add(stringHeader);
 
                     kafkaProducer.send(producerRecord, (recordMetadata, e) -> {
                         if (e != null) {
@@ -159,4 +157,5 @@ public class RecordProducer {
             LOGGER.error("Exception producing record", t);
         }
     }
+
 }
