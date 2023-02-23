@@ -16,11 +16,7 @@
 
 package com.github.dhoard.k.synthetic.test;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.DoubleAdder;
-import io.prometheus.client.GaugeMetricFamily;
-import io.prometheus.client.SimpleCollector;
-import io.prometheus.client.Summary;
+import io.prometheus.client.*;
 
 import java.io.Closeable;
 import java.util.ArrayList;

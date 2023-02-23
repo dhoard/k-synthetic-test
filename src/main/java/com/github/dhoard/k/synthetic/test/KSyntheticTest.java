@@ -23,18 +23,19 @@ import com.sun.net.httpserver.HttpsConfigurator;
 import io.prometheus.client.exporter.HTTPServer;
 import nl.altindag.ssl.SSLFactory;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.header.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
 /**
  * Class to implement a synthetic Kafka performance test
  */
-public class KSyntheticTest implements Consumer<ConsumerRecords<String, String>> {
+public class KSyntheticTest implements Consumer<ConsumerRecord<String, String>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KSyntheticTest.class);
 
@@ -45,8 +46,8 @@ public class KSyntheticTest implements Consumer<ConsumerRecords<String, String>>
     private String httpServerAddress;
     private int httpServerPort;
     private boolean logResponses;
-    private RecordProducer messageProducer;
-    private RecordConsumer messageConsumer;
+    private RecordProducer recordProducer;
+    private RecordConsumer recordConsumer;
     private ExpiringGauge roundTripTimeExpiringGauge;
     private HTTPServer httpServer;
 
@@ -187,75 +188,83 @@ public class KSyntheticTest implements Consumer<ConsumerRecords<String, String>>
         // Create specific producer and consumer configuration with a subset of properties
         // to prevent "These configurations X were supplied but are not used yet" warnings
 
-        Configuration consumerConfiguration = configuration.copy();
-        consumerConfiguration.put("metadata.max.age.ms", "60000");
-        consumerConfiguration.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        consumerConfiguration.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        consumerConfiguration.remove("acks");
-        consumerConfiguration.remove("linger.ms");
-        consumerConfiguration.remove("key.serializer");
-        consumerConfiguration.remove("value.serializer");
+        Configuration recordConsumerConfiguration = configuration.copy();
+        recordConsumerConfiguration.put("metadata.max.age.ms", "60000");
+        recordConsumerConfiguration.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        recordConsumerConfiguration.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        recordConsumerConfiguration.remove("acks");
+        recordConsumerConfiguration.remove("linger.ms");
+        recordConsumerConfiguration.remove("key.serializer");
+        recordConsumerConfiguration.remove("value.serializer");
 
-        messageConsumer = new RecordConsumer(consumerConfiguration.toProperties(), this);
-        messageConsumer.start();
+        recordConsumer = new RecordConsumer(recordConsumerConfiguration, this);
+        recordConsumer.start();
 
-        Configuration producerConfiguration = configuration.copy();
-        producerConfiguration.put("metadata.max.age.ms", "60000");
-        producerConfiguration.remove("key.deserializer");
-        producerConfiguration.remove("value.deserializer");
-        producerConfiguration.remove("session.timeout.ms");
-        producerConfiguration.put("batch.size", "0");
-        producerConfiguration.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        producerConfiguration.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        Configuration recordProducerConfiguration = configuration.copy();
+        recordProducerConfiguration.put("metadata.max.age.ms", "60000");
+        recordProducerConfiguration.remove("key.deserializer");
+        recordProducerConfiguration.remove("value.deserializer");
+        recordProducerConfiguration.remove("session.timeout.ms");
+        recordProducerConfiguration.put("batch.size", "0");
+        recordProducerConfiguration.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        recordProducerConfiguration.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
-        if (!producerConfiguration.containsKey("acks")) {
-            producerConfiguration.put("acks", "all");
+        if (!recordProducerConfiguration.containsKey("acks")) {
+            recordProducerConfiguration.put("acks", "all");
         }
 
-        if (!producerConfiguration.containsKey("linger.ms")) {
-            producerConfiguration.put("linger.ms", "0");
+        if (!recordProducerConfiguration.containsKey("linger.ms")) {
+            recordProducerConfiguration.put("linger.ms", "0");
         }
 
-        messageProducer = new RecordProducer(producerConfiguration.toProperties(), delayMs, periodMs);
-        messageProducer.start();
+        recordProducer = new RecordProducer(id, delayMs, periodMs, recordProducerConfiguration);
+        recordProducer.start();
 
         LOGGER.info("running");
 
         countDownLatch.await();
 
         httpServer.close();
-        messageProducer.close();
-        messageConsumer.close();
+        recordProducer.close();
+        recordConsumer.close();
     }
 
     /**
-     * Method to process messages
+     * Method to process a ConsumerRecord
      *
-     * @param consumerRecords
+     * @param consumerRecord
      */
-    public void accept(ConsumerRecords<String, String> consumerRecords) {
-        for (ConsumerRecord<String, String> consumerRecord : consumerRecords) {
-            long messageTimestampMs = Long.parseLong(consumerRecord.value());
-            long nowMs = System.currentTimeMillis();
-            long elapsedTimeMs = nowMs - messageTimestampMs;
-            String partition = String.valueOf(consumerRecord.partition());
+    public void accept(ConsumerRecord<String, String> consumerRecord) {
+        Header[] headers = consumerRecord.headers().toArray();
+        for (Header header : headers) {
+            if ("id".equals(header.key())) {
+                String value = new String(header.value(), StandardCharsets.UTF_8);
+                if (id.equals(value)) {
+                    long recordValueTimestampMs = Long.parseLong(consumerRecord.value());
+                    long nowMs = System.currentTimeMillis();
+                    long elapsedTimeMs = nowMs - recordValueTimestampMs;
+                    String partition = String.valueOf(consumerRecord.partition());
 
-            roundTripTimeExpiringGauge
-                    .labels(
-                            id,
-                            bootstrapServers,
-                            topic,
-                            partition)
-                    .set(elapsedTimeMs);
+                    roundTripTimeExpiringGauge
+                            .labels(
+                                    id,
+                                    bootstrapServers,
+                                    topic,
+                                    partition)
+                            .set(elapsedTimeMs);
 
-            if (logResponses) {
-                LOGGER.info(
-                        String.format(
-                                "id [%s] bootstrap.servers [%s] topic [%s] partition [%d] round trip time [%d] ms",
-                                id,
-                                bootstrapServers,
-                                topic,
-                                consumerRecord.partition(), elapsedTimeMs));
+                    if (logResponses) {
+                        LOGGER.info(
+                                String.format(
+                                        "id [%s] bootstrap.servers [%s] topic [%s] partition [%d] round trip time [%d] ms",
+                                        id,
+                                        bootstrapServers,
+                                        topic,
+                                        consumerRecord.partition(), elapsedTimeMs));
+                    }
+                }
+
+                break;
             }
         }
     }
@@ -287,7 +296,6 @@ public class KSyntheticTest implements Consumer<ConsumerRecords<String, String>>
      */
     private void banner(String string) {
         String line = String.format("%0" + string.length() + "d", 0).replace('0', '-');
-
         LOGGER.info(line);
         LOGGER.info(string);
         LOGGER.info(line);

@@ -15,14 +15,21 @@ mvn clean package
 
 ## Kafka Topic Configuration
 
-You need to create a unique test topic per application instance with enough partitions to span all brokers
+Create a topic for the application to use with enough partitions to span all brokers
+
+- a topic can be shared with multiple application instances
+
 
 - topic partition count increases are automatically handled
-- It may take up to 60000 ms to reflect the new topic partition count
+
+
+- It may take up to 60000 ms to reflect the topic partition count changes
 
 ### Self-Managed Kafka
 
 The configuration `test.properties` in https://github.com/dhoard/k-synthetic-test/blob/main/configuration/test.properties should be self-explanatory
+
+- the example `test.properties` documents configuration values
 
 ### Confluent Cloud
 
@@ -61,16 +68,8 @@ kcat -b ${CCLOUD_BROKERS} -L \
 
 **Notes**
 
-- This application uses manual partition assignment
-  - dynamic Kafka partition increases are currently not handle
-
-
-- Example topic name is `k-synthetic-test-<id>`
-  - where `<id>` matches the `id` in your test properties
-
-
-- Example retention time is `300,000` ms (5 minutes)
-  - old messages provide no value, so are skipped
+- Suggested retention time is `300,000` ms (5 minutes)
+  - old records provide no value, so are skipped
 
 
 ## Run
@@ -78,6 +77,8 @@ kcat -b ${CCLOUD_BROKERS} -L \
 **Step 1**
 
 Copy `configuration/test.properties` and edit to match your environment
+
+- Configuration value `id` should be unique per application instance
 
 **Step 2**
 
@@ -98,7 +99,12 @@ java -jar target/k-synthetic-test-0.0.6.jar configuration/test.properties
 
 ## Metrics
 
-Access Prometheus metrics using `http://<http.server.address>:<http.server.port>`
+Access Prometheus metrics using `http://<ip address or hostname>:<http.server.port>`
+
+- Configuration value `http.server.address` detemines the IP address to service Prometheus metrics requests
+
+- To bind to all IP addresses use `0.0.0.0`
+
 
 Example URL (based on `test.properties`:
 
@@ -118,7 +124,8 @@ k_synthetic_test_round_trip_time{id="source-10.0.0.1",bootstrap_servers="cp-1:90
 
 **Notes**
 
-- A test message is sent to every partition based on the configured `period.ms` value
+
+- A record is sent to every partition based on the configured `period.ms` value
 
 
 - A negative value indicates that a metric hasn't been updated within the configured `metric.expiration.period.ms` value

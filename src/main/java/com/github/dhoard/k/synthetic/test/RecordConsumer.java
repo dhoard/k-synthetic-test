@@ -16,7 +16,7 @@
 
 package com.github.dhoard.k.synthetic.test;
 
-import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
@@ -24,16 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -45,7 +37,7 @@ public class RecordConsumer {
 
     private final Properties properties;
     private final String topic;
-    private final Consumer<ConsumerRecords<String, String>> consumer;
+    private final Consumer<ConsumerRecord<String, String>> consumer;
 
     private Thread thread;
     private CountDownLatch countDownLatch;
@@ -56,11 +48,11 @@ public class RecordConsumer {
     /**
      * Constructor
      *
-     * @param properties
+     * @param configuration
      * @param consumer
      */
-    public RecordConsumer(Properties properties, Consumer<ConsumerRecords<String, String>> consumer) {
-        this.properties = properties;
+    public RecordConsumer(Configuration configuration, Consumer<ConsumerRecord<String, String>> consumer) {
+        this.properties = configuration.toProperties();
         this.consumer = consumer;
         this.topic = (String) properties.remove("topic");
     }
@@ -68,7 +60,7 @@ public class RecordConsumer {
     /**
      * Method to start the consumer
      */
-    public void start() throws InterruptedException, ExecutionException {
+    public void start() {
         synchronized (this) {
             if (thread == null) {
                 LOGGER.info("starting consumer");
@@ -150,7 +142,7 @@ public class RecordConsumer {
         while (countDownLatch.getCount() == 2) {
             try {
                 synchronized (kafkaConsumer) {
-                    consumer.accept(kafkaConsumer.poll(Duration.ofMillis(10000)));
+                    kafkaConsumer.poll(Duration.ofMillis(10000)).forEach(consumer);
                 }
             } catch (Throwable t) {
                 LOGGER.error("Exception consuming message", t);
