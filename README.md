@@ -95,7 +95,7 @@ http://localhost:8080
 
 **NOTES**
 
-- The Docker images exposes port `8080`
+- The Docker images exposes port `8080` doesn't support HTTPS on the Prometheus endpoint
 
 ## Running (via Java)
 
