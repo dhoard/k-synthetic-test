@@ -71,8 +71,31 @@ kcat -b ${CCLOUD_BROKERS} -L \
 - Suggested retention time is `300,000` ms (5 minutes)
   - old records provide no value, so are skipped
 
+## Running (via Docker image)
 
-## Run
+**Step 1**
+
+Copy `configuration/test.properties` and edit to match your environment
+
+- Configuration value `id` should be unique per application instance
+
+**Step 2**
+
+```shell
+docker run -v ./test.properties:/k-synthetic-test.properties -p 8080:8080 dhoard/k-synthetic-test:0.0.7
+```
+
+Example URL (based on `test.properties`:
+
+```
+http://localhost:8080
+```
+
+**NOTES**
+
+- The Docker images exposes port `8080`
+
+## Running (via Java)
 
 **Step 1**
 
