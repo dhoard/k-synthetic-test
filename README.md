@@ -81,6 +81,8 @@ Copy `configuration/test.properties` and edit to match your environment
 
 **Step 2**
 
+Run via docker
+
 ```shell
 docker run -v ./test.properties:/k-synthetic-test.properties -p 8080:8080 dhoard/k-synthetic-test:0.0.7
 ```
